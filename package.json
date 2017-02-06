@@ -1,0 +1,20 @@
+{
+  "name": "thor-io.vnext.temperaturesample",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "express": "^4.14.1",
+    "express-ws": "^2.0.0",
+    "reflect-metadata": "^0.1.9",
+    "thor-io.vnext": "^1.4.2",
+    "vue": "^2.1.10"
+  }
+}

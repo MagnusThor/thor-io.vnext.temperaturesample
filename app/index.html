@@ -1,0 +1,143 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container" id="my-app">
+    <div class="row">
+        <div class="col-xs-12">
+        <h1>Temperature microservice</h1>
+        <p>
+        This examples shows how to use the thor-io.vnext.nodejs client and the BufferTransport togheter with the
+        WebSockets. It illustrates the crossprotocol functionallity as well as stateful controllers ( microservices ).
+        </p>
+
+    </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+        <p>
+            {{message}}
+        </p>
+        </div>
+        </div>
+    
+        <div class="row">
+        <div class="col-xs-12">
+            <div class="alert alert-info">
+                {{ temperatureChange }}
+            </div>
+        </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-xs-6">
+                <div class="form-group">
+                <label>Min temp</label>
+                <input min="1" max="10" type="number" id="min-level" v-model="minLevel" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-xs-6">
+                <div class="form-group">
+                <label>Max temp</label>
+                <input min="1" max="10" type="number" id="max-level" v-model="maxLevel" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>
+                    To run a client clone the 
+                    <a href="https://github.com/MagnusThor/thor-io.vnext.nodeJS-client">
+                    https://github.com/MagnusThor/thor-io.vnext.nodeJS-client
+                    </a> or install the client using <code>npm install thor-io.vnext.nodeJS-client</code>
+                    and use the code from code from the /sample folder.
+                    </p>
+            </div>
+            </div>
+    </div>
+
+    <script src="/lib/thor-io.vnext/thor-io.client.js"></script>
+    <script src="/lib/vue/dist/vue.js"></script>
+    <script>
+    var app = new Vue({
+        el: "#my-app",
+        data: {
+            message: "Starting...",
+            temperatureChange: "Waiting for signal...",
+            minLevel: 1,
+            maxLevel: 10
+        },
+        watch:{
+            minLevel: function(n){
+                console.log("set min",n);
+                this.setMinLevel(n);
+
+            },
+            maxLevel: function(n){
+                this.setMaxLevel(n);
+                  console.log("set max",n);
+            }
+        },
+        
+        methods:{
+
+            setMaxLevel: function(n) {
+                this.message = "Max temp is set to " + n.toString();
+                var proxy = this.factory.GetProxy("microservice");
+                proxy.SetProperty("maxLevel",n);
+            },
+
+            setMinLevel: function(n){
+                this.message = "Min temp is set to " + n.toString();
+            
+                var proxy = this.factory.GetProxy("microservice");
+                proxy.SetProperty("minLevel",n);
+            },
+           
+            connect: function(){
+                var that = this;
+                var factory = new ThorIO.Client.Factory(location.origin.replace(/^http/, 'ws'),["microservice"]);
+                
+                factory.OnOpen = function(proxy){
+
+                        proxy.OnOpen= function(){
+                            that.message = "Connected to microservice";
+                        };
+
+                        proxy.On("temperatureChange", function(p){
+                           //     console.log(arguments);
+                            that.temperatureChange = p.temp.toFixed(2);
+
+
+                        });
+                        proxy.Connect();
+                }
+
+                that.factory = factory;
+
+            }
+        }
+        ,
+
+        mounted() {
+            this.message = "Connecting..";
+            this.connect();  
+          
+        }
+    });
+    
+    
+
+    </script>
+</body>
+
+
+</html>
